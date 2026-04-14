@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from flask import Flask, render_template
 
@@ -6,6 +7,9 @@ app = Flask(__name__)
 # --- LOAD DATA ---
 df = pd.read_csv("01_District_wise_crimes_committed_IPC_2001_2012.csv")
 df.columns = df.columns.str.strip()
+
+# FIX: Remove aggregated TOTAL rows to avoid double-counting
+df = df[df["DISTRICT"].str.upper() != "TOTAL"]
 
 # Crime columns to rank for Top 3
 CRIME_COLS = [
@@ -95,7 +99,5 @@ def state_dashboard(state):
     return render_template("index.html", state=state.upper(), data=data)
 
 # --- RUN ---
-import os
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
